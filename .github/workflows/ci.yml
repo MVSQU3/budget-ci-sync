@@ -1,0 +1,24 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder
+      DATABASE_URL_UNPOOLED: postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder
+      SYNC_PEPPER: ci-placeholder-pepper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
