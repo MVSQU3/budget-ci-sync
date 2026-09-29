@@ -1,0 +1,75 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+/// Shared vault. The device secret is stored only as scrypt(hash) + salt.
+model Vault {
+  id         String   @id @db.Uuid
+  secretHash String
+  secretSalt String
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  accounts   Account[]
+  categories Category[]
+  operations Operation[]
+}
+
+model Account {
+  vaultId             String    @db.Uuid
+  id                  String
+  name                String
+  currency            String
+  openingBalanceCents Int
+  archived            Boolean
+  createdAt           DateTime  @db.Timestamptz(3)
+  updatedAt           DateTime  @db.Timestamptz(3)
+  deletedAt           DateTime? @db.Timestamptz(3)
+
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  @@id([vaultId, id])
+  @@index([vaultId, updatedAt, id])
+}
+
+model Category {
+  vaultId   String    @db.Uuid
+  id        String
+  name      String
+  kind      String
+  color     String?
+  createdAt DateTime  @db.Timestamptz(3)
+  updatedAt DateTime  @db.Timestamptz(3)
+  deletedAt DateTime? @db.Timestamptz(3)
+
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  @@id([vaultId, id])
+  @@index([vaultId, updatedAt, id])
+}
+
+model Operation {
+  vaultId     String    @db.Uuid
+  id          String
+  accountId   String
+  categoryId  String?
+  amountCents Int
+  occurredOn  DateTime  @db.Date
+  label       String
+  note        String?
+  createdAt   DateTime  @db.Timestamptz(3)
+  updatedAt   DateTime  @db.Timestamptz(3)
+  deletedAt   DateTime? @db.Timestamptz(3)
+
+  vault Vault @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  @@id([vaultId, id])
+  @@index([vaultId, updatedAt, id])
+}
