@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "node scripts/prisma-generate.mjs && next build",
+    "vercel-build": "npm run db:migrate && npm run build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "node scripts/prisma-generate.mjs && tsc --noEmit",
